@@ -1,4 +1,4 @@
-# 🎮 List-Task - Pixel Perfect Productivity
+# 📝 List-Task - Pixel Perfect Productivity
 
 <div align="center"> 
 <img src="https://img.shields.io/badge/Retro_Styled-Productivity-8B7355?style=for-the-badge&logo=github&logoColor=F5F5DC" alt="Retro Badge"> 
@@ -10,13 +10,13 @@
 
 ---
 
-## 🕹️ Level Up Your Productivity
+## 🚀 Level Up Your Productivity
 
 List-Task is a retro-styled task management application that combines nostalgic 80s/90s pixel art aesthetics with modern productivity features. Experience the charm of vintage computing while efficiently organizing your daily tasks.
 
 ---
 
-### 🚀 How To Use
+### 🕹️ How To Use
 
 https://alfanrizkyw.github.io/List-Task-by-Paan/
 
