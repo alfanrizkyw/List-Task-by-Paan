@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelVibe Tasks - Retro To-Do List</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --vintage-brown: #8B7355;
+            --vintage-dark: #3D2B1F;
+            --vintage-light: #D2B48C;
+            --vintage-cream: #F5F5DC;
+            --vintage-red: #A52A2A;
+            --vintage-green: #556B2F;
+            --vintage-blue: #4682B4;
+            --pixel-size: 4px;
+        }
+
+        body {
+            background-color: var(--vintage-dark);
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(0,0,0,0.1) 20px, rgba(0,0,0,0.1) 21px),
+                repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(0,0,0,0.1) 20px, rgba(0,0,0,0.1) 21px);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-family: 'VT323', monospace;
+            color: var(--vintage-cream);
+            overflow-x: hidden;
+        }
+
+        /* Screen states */
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Intro Screen */
+        #intro-screen {
+            text-align: center;
+        }
+
+        .intro-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 36px;
+            color: var(--vintage-cream);
+            text-shadow: 4px 4px 0 var(--vintage-red);
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            animation: titleGlitch 8s infinite;
+        }
+
+        @keyframes titleGlitch {
+            0%, 100% { transform: translate(0); }
+            95% { transform: translate(0); }
+            96% { transform: translate(-2px, 1px); }
+            97% { transform: translate(1px, -1px); }
+            98% { transform: translate(-1px, 1px); }
+            99% { transform: translate(1px, -1px); }
+        }
+
+        .intro-container {
+            background-color: var(--vintage-brown);
+            border: 8px solid var(--vintage-dark);
+            box-shadow: 
+                0 0 0 4px var(--vintage-light),
+                inset 0 0 0 4px var(--vintage-light),
+                10px 10px 0 rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .intro-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.03) 0px,
+                rgba(0, 0, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1;
+            animation: scanline 10s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 0 100%;
+            }
+        }
+
+        .intro-text {
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            text-align: left;
+            color: var(--vintage-cream);
+            position: relative;
+            z-index: 2;
+        }
+
+        .creator {
+            font-size: 18px;
+            color: var(--vintage-light);
+            margin-bottom: 30px;
+            text-align: right;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn-start {
+            padding: 15px 30px;
+            background-color: var(--vintage-red);
+            color: var(--vintage-cream);
+            border: 3px solid var(--vintage-dark);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn-start:hover {
+            background-color: var(--vintage-green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 0 var(--vintage-dark);
+        }
+
+        .btn-start:active {
+            transform: translateY(0);
+            box-shadow: 0 0 0 var(--vintage-dark);
+        }
+
+        /* Auth Screen */
+        .auth-container {
+            background-color: var(--vintage-brown);
+            border: 8px solid var(--vintage-dark);
+            box-shadow: 
+                0 0 0 4px var(--vintage-light),
+                inset 0 0 0 4px var(--vintage-light),
+                10px 10px 0 rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .auth-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.03) 0px,
+                rgba(0, 0, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--vintage-dark);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: var(--vintage-light);
+            color: var(--vintage-dark);
+            cursor: pointer;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            background: var(--vintage-brown);
+            color: var(--vintage-cream);
+        }
+
+        .auth-form {
+            display: none;
+            position: relative;
+            z-index: 2;
+        }
+
+        .auth-form.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 18px;
+            color: var(--vintage-cream);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: var(--vintage-cream);
+            border: 3px solid var(--vintage-dark);
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            color: var(--vintage-dark);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--vintage-blue);
+        }
+
+        .btn-auth {
+            width: 100%;
+            padding: 12px;
+            background: var(--vintage-red);
+            color: var(--vintage-cream);
+            border: 3px solid var(--vintage-dark);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .btn-auth:hover {
+            background: var(--vintage-green);
+        }
+
+        .social-login {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-social {
+            flex: 1;
+            padding: 12px;
+            border: 3px solid var(--vintage-dark);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-google {
+            background: #DB4437;
+            color: white;
+        }
+
+        .btn-facebook {
+            background: #4267B2;
+            color: white;
+        }
+
+        .btn-github {
+            background: #333;
+            color: white;
+        }
+
+        .btn-social:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 0 var(--vintage-dark);
+        }
+
+        /* Main App Screen */
+        .container {
+            width: 100%;
+            background-color: var(--vintage-brown);
+            border: 8px solid var(--vintage-dark);
+            box-shadow: 
+                0 0 0 4px var(--vintage-light),
+                inset 0 0 0 4px var(--vintage-light),
+                10px 10px 0 rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: pixelAppear 1.5s ease-out;
+        }
+
+        @keyframes pixelAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.03) 0px,
+                rgba(0, 0, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1;
+            animation: scanline 10s linear infinite;
+        }
+
+        header {
+            padding: 20px;
+            text-align: center;
+            background-color: var(--vintage-dark);
+            border-bottom: 4px solid var(--vintage-light);
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--vintage-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            border: 2px solid var(--vintage-light);
+        }
+
+        .user-name {
+            font-size: 18px;
+            color: var(--vintage-light);
+        }
+
+        .btn-logout {
+            padding: 8px 15px;
+            background: var(--vintage-red);
+            color: var(--vintage-cream);
+            border: 2px solid var(--vintage-dark);
+            font-family: 'VT323', monospace;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: var(--vintage-green);
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 24px;
+            color: var(--vintage-cream);
+            text-shadow: 3px 3px 0 var(--vintage-red);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            animation: textGlitch 5s infinite;
+        }
+
+        @keyframes textGlitch {
+            0%, 100% {
+                transform: translate(0);
+            }
+            95% {
+                transform: translate(0);
+            }
+            96% {
+                transform: translate(-2px, 1px);
+            }
+            97% {
+                transform: translate(1px, -1px);
+            }
+            98% {
+                transform: translate(-1px, 1px);
+            }
+            99% {
+                transform: translate(1px, -1px);
+            }
+        }
+
+        .date {
+            font-size: 22px;
+            color: var(--vintage-light);
+            margin-bottom: 5px;
+        }
+
+        .separator {
+            height: 4px;
+            background-color: var(--vintage-light);
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .separator::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--vintage-cream), transparent);
+            animation: separatorFlow 3s infinite;
+        }
+
+        @keyframes separatorFlow {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+
+        .progress-section {
+            padding: 15px 20px;
+            background-color: rgba(61, 43, 31, 0.7);
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-label {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: var(--vintage-light);
+        }
+
+        .progress-bar {
+            height: 20px;
+            background-color: var(--vintage-dark);
+            border: 2px solid var(--vintage-light);
+            margin-bottom: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--vintage-green);
+            width: 0%;
+            position: relative;
+            transition: width 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        .progress-fill::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+        }
+
+        .progress-text {
+            font-size: 18px;
+            text-align: right;
+            color: var(--vintage-light);
+        }
+
+        .input-section {
+            padding: 15px 20px;
+            background-color: rgba(139, 115, 85, 0.8);
+            border-top: 4px solid var(--vintage-dark);
+            border-bottom: 4px solid var(--vintage-dark);
+            position: relative;
+            z-index: 2;
+        }
+
+        .input-label {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: var(--vintage-cream);
+            text-shadow: 1px 1px 0 var(--vintage-dark);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        #taskInput {
+            flex: 1;
+            padding: 12px;
+            border: 3px solid var(--vintage-dark);
+            background-color: var(--vintage-cream);
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            color: var(--vintage-dark);
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #taskInput:focus {
+            border-color: var(--vintage-light);
+            box-shadow: 0 0 0 3px var(--vintage-green);
+        }
+
+        #addTaskBtn {
+            padding: 12px 20px;
+            background-color: var(--vintage-red);
+            color: var(--vintage-cream);
+            border: 3px solid var(--vintage-dark);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #addTaskBtn:hover {
+            background-color: var(--vintage-green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 0 var(--vintage-dark);
+        }
+
+        #addTaskBtn:active {
+            transform: translateY(0);
+            box-shadow: 0 0 0 var(--vintage-dark);
+        }
+
+        .tasks-section {
+            padding: 15px 20px 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tasks-label {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: var(--vintage-cream);
+            text-shadow: 1px 1px 0 var(--vintage-dark);
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 2px dashed var(--vintage-light);
+            animation: taskAppear 0.5s ease-out;
+            position: relative;
+        }
+
+        @keyframes taskAppear {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            border: 2px solid var(--vintage-dark);
+            background-color: var(--vintage-cream);
+            position: relative;
+        }
+
+        .task-checkbox:checked {
+            background-color: var(--vintage-green);
+        }
+
+        .task-checkbox:checked::after {
+            content: "✓";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--vintage-cream);
+            font-weight: bold;
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 20px;
+            transition: all 0.3s;
+            color: var(--vintage-cream);
+        }
+
+        .task-text.completed {
+            text-decoration: line-through;
+            color: var(--vintage-light);
+            opacity: 0.7;
+        }
+
+        .task-delete {
+            background: none;
+            border: none;
+            color: var(--vintage-red);
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s;
+            opacity: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid transparent;
+        }
+
+        .task-item:hover .task-delete {
+            opacity: 1;
+        }
+
+        .task-delete:hover {
+            color: var(--vintage-cream);
+            background-color: var(--vintage-red);
+            border: 1px solid var(--vintage-dark);
+        }
+
+        /* Pixel corners */
+        .pixel-corner {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--vintage-light);
+            z-index: 5;
+        }
+
+        .pixel-corner-tl {
+            top: -5px;
+            left: -5px;
+        }
+
+        .pixel-corner-tr {
+            top: -5px;
+            right: -5px;
+        }
+
+        .pixel-corner-bl {
+            bottom: -5px;
+            left: -5px;
+        }
+
+        .pixel-corner-br {
+            bottom: -5px;
+            right: -5px;
+        }
+
+        /* CRT screen effect */
+        .crt-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%,
+                rgba(0, 0, 0, 0.1) 50%
+            );
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0.2;
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% {
+                opacity: 0.2;
+            }
+            50% {
+                opacity: 0.1;
+            }
+            100% {
+                opacity: 0.2;
+            }
+        }
+
+        /* Auto-save indicator */
+        .save-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--vintage-green);
+            color: var(--vintage-cream);
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 100;
+            border: 2px solid var(--vintage-dark);
+        }
+
+        .save-indicator.show {
+            opacity: 1;
+        }
+
+        /* Notification system */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--vintage-green);
+            color: var(--vintage-cream);
+            padding: 12px 20px;
+            border-radius: 4px;
+            font-size: 16px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s;
+            z-index: 100;
+            border: 2px solid var(--vintage-dark);
+            max-width: 300px;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: var(--vintage-red);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .intro-title {
+                font-size: 24px;
+            }
+            
+            h1 {
+                font-size: 18px;
+            }
+            
+            .date {
+                font-size: 18px;
+            }
+            
+            .input-container {
+                flex-direction: column;
+            }
+            
+            #addTaskBtn {
+                width: 100%;
+                margin-top: 10px;
+            }
+            
+            .task-text {
+                font-size: 18px;
+            }
+            
+            .social-login {
+                flex-direction: column;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .notification {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auto-save indicator -->
+    <div class="save-indicator" id="saveIndicator">Progress Saved!</div>
+    
+    <!-- Notification system -->
+    <div class="notification" id="notification"></div>
+    
+    <!-- CRT screen effect -->
+    <div class="crt-effect"></div>
+    
+ <!-- Intro Screen -->
+<div class="screen active" id="intro-screen">
+    <div class="intro-container">
+        <h1 class="intro-title">List-Task</h1>
+        <div class="intro-text">
+            <p><strong>List-Task</strong> - Level Up Your Productivity</p>
+            <br>
+            <p>It is a useful application to make it easier for users to compile task lists so that they are organized and scheduled.</p>
+            <br>
+            <p>Features:</p>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>Add, edit, and delete daily tasks</li>
+                <li>Mark tasks as completed</li>
+                <li>Track daily productivity progress</li>
+                <li>Visual progress bar to see task progress</li>
+                <li>Overtime productivity monitoring</li>
+            </ul>
+            <br>
+            <p>Make productivity fun again with timeless retro charm!</p>
+        </div>
+        <div class="creator">Created by Paan</div>
+        <button class="btn-start" id="btnStart">Start Your Journey</button>
+        
+        <!-- Pixel corners -->
+        <div class="pixel-corner pixel-corner-tl"></div>
+        <div class="pixel-corner pixel-corner-tr"></div>
+        <div class="pixel-corner pixel-corner-bl"></div>
+        <div class="pixel-corner pixel-corner-br"></div>
+    </div>
+</div>
+
+            <!-- Pixel corners -->
+            <div class="pixel-corner pixel-corner-tl"></div>
+            <div class="pixel-corner pixel-corner-tr"></div>
+            <div class="pixel-corner pixel-corner-bl"></div>
+            <div class="pixel-corner pixel-corner-br"></div>
+        </div>
+    </div>
+    
+    <!-- Auth Screen -->
+    <div class="screen" id="auth-screen">
+        <div class="auth-container">
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="login">Login</div>
+                <div class="auth-tab" data-tab="signup">Sign Up</div>
+            </div>
+            
+            <!-- Login Form -->
+            <div class="auth-form active" id="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="login-email">Email</label>
+                    <input type="email" id="login-email" class="form-input" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="login-password">Password</label>
+                    <input type="password" id="login-password" class="form-input" placeholder="Enter your password">
+                </div>
+                <button class="btn-auth" id="btnLogin">Login</button>
+                
+                <div class="social-login">
+                    <button class="btn-social btn-google" id="btnGoogle">
+                        <i class="fab fa-google"></i> Google
+                    </button>
+                    <button class="btn-social btn-facebook" id="btnFacebook">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </button>
+                    <button class="btn-social btn-github" id="btnGithub">
+                        <i class="fab fa-github"></i> GitHub
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Sign Up Form -->
+            <div class="auth-form" id="signup-form">
+                <div class="form-group">
+                    <label class="form-label" for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" class="form-input" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="signup-email">Email</label>
+                    <input type="email" id="signup-email" class="form-input" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="signup-password">Password</label>
+                    <input type="password" id="signup-password" class="form-input" placeholder="Create a password">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="signup-confirm">Confirm Password</label>
+                    <input type="password" id="signup-confirm" class="form-input" placeholder="Confirm your password">
+                </div>
+                <button class="btn-auth" id="btnSignup">Sign Up</button>
+                
+                <div class="social-login">
+                    <button class="btn-social btn-google" id="btnGoogleSignup">
+                        <i class="fab fa-google"></i> Google
+                    </button>
+                    <button class="btn-social btn-facebook" id="btnFacebookSignup">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </button>
+                    <button class="btn-social btn-github" id="btnGithubSignup">
+                        <i class="fab fa-github"></i> GitHub
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Pixel corners -->
+            <div class="pixel-corner pixel-corner-tl"></div>
+            <div class="pixel-corner pixel-corner-tr"></div>
+            <div class="pixel-corner pixel-corner-bl"></div>
+            <div class="pixel-corner pixel-corner-br"></div>
+        </div>
+    </div>
+    
+    <!-- Main App Screen -->
+    <div class="screen" id="app-screen">
+        <div class="container">
+            <!-- Pixel corners -->
+            <div class="pixel-corner pixel-corner-tl"></div>
+            <div class="pixel-corner pixel-corner-tr"></div>
+            <div class="pixel-corner pixel-corner-bl"></div>
+            <div class="pixel-corner pixel-corner-br"></div>
+            
+            <header>
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div class="user-name" id="userName">User</div>
+                </div>
+                <h1>List-Task</h1>
+                <button class="btn-logout" id="btnLogout">Logout</button>
+            </header>
+            
+            <div class="date" id="currentDate">Saturday 19 July</div>
+            <div class="separator"></div>
+            
+            <div class="progress-section">
+                <div class="progress-label">Progress:</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">0 / 0 tasks done</div>
+            </div>
+            
+            <div class="input-section">
+                <div class="input-label">Input your task!</div>
+                <div class="input-container">
+                    <input type="text" id="taskInput" placeholder="Add a new task...">
+                    <button id="addTaskBtn">Add Task</button>
+                </div>
+            </div>
+            
+            <div class="tasks-section">
+                <div class="tasks-label">My Tasks:</div>
+                <ul class="task-list" id="taskList">
+                    <!-- Tasks will be added here dynamically -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const introScreen = document.getElementById('intro-screen');
+            const authScreen = document.getElementById('auth-screen');
+            const appScreen = document.getElementById('app-screen');
+            const btnStart = document.getElementById('btnStart');
+            const authTabs = document.querySelectorAll('.auth-tab');
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+            const btnLogin = document.getElementById('btnLogin');
+            const btnSignup = document.getElementById('btnSignup');
+            const btnLogout = document.getElementById('btnLogout');
+            const socialButtons = document.querySelectorAll('.btn-social');
+            const taskInput = document.getElementById('taskInput');
+            const addTaskBtn = document.getElementById('addTaskBtn');
+            const taskList = document.getElementById('taskList');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const currentDate = document.getElementById('currentDate');
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const saveIndicator = document.getElementById('saveIndicator');
+            const notification = document.getElementById('notification');
+            
+            // App State
+            let currentUser = null;
+            let tasks = [];
+            let autoSaveTimeout = null;
+            
+            // Initialize the app
+            initApp();
+            
+            // Event Listeners
+            btnStart.addEventListener('click', showAuthScreen);
+            
+            authTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    authTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding form
+                    loginForm.classList.remove('active');
+                    signupForm.classList.remove('active');
+                    
+                    if (tabName === 'login') {
+                        loginForm.classList.add('active');
+                    } else {
+                        signupForm.classList.add('active');
+                    }
+                });
+            });
+            
+            btnLogin.addEventListener('click', handleLogin);
+            btnSignup.addEventListener('click', handleSignup);
+            btnLogout.addEventListener('click', handleLogout);
+            
+            // Fix for social login buttons
+            document.getElementById('btnGoogle').addEventListener('click', () => handleSocialLogin('Google'));
+            document.getElementById('btnFacebook').addEventListener('click', () => handleSocialLogin('Facebook'));
+            document.getElementById('btnGithub').addEventListener('click', () => handleSocialLogin('GitHub'));
+            document.getElementById('btnGoogleSignup').addEventListener('click', () => handleSocialLogin('Google'));
+            document.getElementById('btnFacebookSignup').addEventListener('click', () => handleSocialLogin('Facebook'));
+            document.getElementById('btnGithubSignup').addEventListener('click', () => handleSocialLogin('GitHub'));
+            
+            addTaskBtn.addEventListener('click', addTask);
+            taskInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addTask();
+                }
+            });
+            
+            // Functions
+            function initApp() {
+                // Check if user is already logged in
+                const savedUser = localStorage.getItem('currentUser');
+                if (savedUser) {
+                    try {
+                        currentUser = JSON.parse(savedUser);
+                        loadUserData();
+                        showAppScreen();
+                        showNotification('Welcome back!', 'success');
+                    } catch (e) {
+                        console.error('Error parsing saved user data:', e);
+                        localStorage.removeItem('currentUser');
+                        showIntroScreen();
+                    }
+                } else {
+                    showIntroScreen();
+                }
+                
+                // Update date
+                updateDate();
+            }
+            
+            function showIntroScreen() {
+                hideAllScreens();
+                introScreen.classList.add('active');
+            }
+            
+            function showAuthScreen() {
+                hideAllScreens();
+                authScreen.classList.add('active');
+            }
+            
+            function showAppScreen() {
+                hideAllScreens();
+                appScreen.classList.add('active');
+                
+                // Update user info
+                if (currentUser) {
+                    userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
+                    userName.textContent = currentUser.name;
+                    userAvatar.style.backgroundColor = currentUser.avatarColor;
+                }
+            }
+            
+            function hideAllScreens() {
+                introScreen.classList.remove('active');
+                authScreen.classList.remove('active');
+                appScreen.classList.remove('active');
+            }
+            
+            function updateDate() {
+                const now = new Date();
+                const options = { weekday: 'long', day: 'numeric', month: 'long' };
+                currentDate.textContent = now.toLocaleDateString('en-US', options);
+            }
+            
+            function handleLogin() {
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                
+                if (!email || !password) {
+                    showNotification('Please fill in all fields', 'error');
+                    return;
+                }
+                
+                // In a real app, this would be an API call
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const user = users.find(u => u.email === email && u.password === password);
+                
+                if (user) {
+                    currentUser = user;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    loadUserData();
+                    showAppScreen();
+                    showNotification('Login successful!', 'success');
+                } else {
+                    showNotification('Invalid email or password', 'error');
+                }
+            }
+            
+            function handleSignup() {
+                const name = document.getElementById('signup-name').value;
+                const email = document.getElementById('signup-email').value;
+                const password = document.getElementById('signup-password').value;
+                const confirm = document.getElementById('signup-confirm').value;
+                
+                if (!name || !email || !password || !confirm) {
+                    showNotification('Please fill in all fields', 'error');
+                    return;
+                }
+                
+                if (password !== confirm) {
+                    showNotification('Passwords do not match', 'error');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    showNotification('Password must be at least 6 characters', 'error');
+                    return;
+                }
+                
+                // In a real app, this would be an API call
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                
+                // Check if user already exists
+                if (users.find(u => u.email === email)) {
+                    showNotification('User with this email already exists', 'error');
+                    return;
+                }
+                
+                // Create new user
+                const newUser = {
+                    id: Date.now(),
+                    name,
+                    email,
+                    password,
+                    avatarColor: getRandomColor(),
+                    tasks: []
+                };
+                
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                currentUser = newUser;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                tasks = [];
+                renderTasks();
+                updateProgress();
+                
+                showAppScreen();
+                showNotification('Account created successfully!', 'success');
+            }
+            
+            function handleSocialLogin(provider) {
+                // In a real app, this would integrate with OAuth providers
+                // For demo purposes, we'll create a mock user
+                const mockUser = {
+                    id: Date.now(),
+                    name: `Social User (${provider})`,
+                    email: `user@${provider.toLowerCase()}.com`,
+                    avatarColor: getRandomColor(),
+                    tasks: []
+                };
+                
+                currentUser = mockUser;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                // Save to users list if not exists
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                if (!users.find(u => u.email === mockUser.email)) {
+                    users.push(mockUser);
+                    localStorage.setItem('users', JSON.stringify(users));
+                }
+                
+                loadUserData();
+                showAppScreen();
+                showNotification(`Logged in with ${provider}`, 'success');
+            }
+            
+            function handleLogout() {
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                showAuthScreen();
+                showNotification('Logged out successfully', 'success');
+            }
+            
+            function loadUserData() {
+                if (!currentUser) return;
+                
+                // Load user's tasks
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const user = users.find(u => u.id === currentUser.id);
+                
+                if (user && user.tasks) {
+                    tasks = user.tasks;
+                } else {
+                    tasks = [];
+                }
+                
+                renderTasks();
+                updateProgress();
+            }
+            
+            function saveUserData() {
+                if (!currentUser) return;
+                
+                // Update user's tasks in the users list
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                
+                if (userIndex !== -1) {
+                    users[userIndex].tasks = tasks;
+                    localStorage.setItem('users', JSON.stringify(users));
+                }
+                
+                // Show save indicator
+                saveIndicator.classList.add('show');
+                setTimeout(() => {
+                    saveIndicator.classList.remove('show');
+                }, 2000);
+            }
+            
+            function addTask() {
+                const taskText = taskInput.value.trim();
+                if (taskText === '') {
+                    // Add shake animation to input
+                    taskInput.style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        taskInput.style.animation = '';
+                    }, 500);
+                    showNotification('Please enter a task', 'error');
+                    return;
+                }
+                
+                const newTask = {
+                    id: Date.now(),
+                    text: taskText,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                
+                tasks.push(newTask);
+                renderTasks();
+                updateProgress();
+                scheduleAutoSave();
+                
+                // Clear input and focus
+                taskInput.value = '';
+                taskInput.focus();
+                
+                showNotification('Task added successfully!', 'success');
+            }
+            
+            function toggleTask(id) {
+                tasks = tasks.map(task => {
+                    if (task.id === id) {
+                        return { ...task, completed: !task.completed };
+                    }
+                    return task;
+                });
+                
+                renderTasks();
+                updateProgress();
+                scheduleAutoSave();
+                
+                // Add completion animation
+                const taskElement = document.querySelector(`[data-id="${id}"]`);
+                if (taskElement) {
+                    taskElement.classList.add('completed-animation');
+                    setTimeout(() => {
+                        taskElement.classList.remove('completed-animation');
+                    }, 400);
+                }
+            }
+            
+            function deleteTask(id) {
+                // Find task element for animation
+                const taskElement = document.querySelector(`[data-id="${id}"]`);
+                if (taskElement) {
+                    taskElement.style.animation = 'taskRemove 0.5s ease-out';
+                    setTimeout(() => {
+                        tasks = tasks.filter(task => task.id !== id);
+                        renderTasks();
+                        updateProgress();
+                        scheduleAutoSave();
+                        showNotification('Task deleted', 'success');
+                    }, 400);
+                }
+            }
+            
+            function renderTasks() {
+                taskList.innerHTML = '';
+                
+                if (tasks.length === 0) {
+                    taskList.innerHTML = '<li style="text-align: center; padding: 20px; color: var(--vintage-light);">No tasks yet. Add one above!</li>';
+                    return;
+                }
+                
+                // Sort tasks: incomplete first, then completed
+                const sortedTasks = [...tasks].sort((a, b) => {
+                    if (a.completed && !b.completed) return 1;
+                    if (!a.completed && b.completed) return -1;
+                    return 0;
+                });
+                
+                sortedTasks.forEach(task => {
+                    const taskItem = document.createElement('li');
+                    taskItem.className = 'task-item';
+                    taskItem.setAttribute('data-id', task.id);
+                    
+                    taskItem.innerHTML = `
+                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
+                        <span class="task-text ${task.completed ? 'completed' : ''}">${task.text}</span>
+                        <button class="task-delete">×</button>
+                    `;
+                    
+                    taskList.appendChild(taskItem);
+                    
+                    // Add event listeners
+                    const checkbox = taskItem.querySelector('.task-checkbox');
+                    const deleteBtn = taskItem.querySelector('.task-delete');
+                    
+                    checkbox.addEventListener('change', () => toggleTask(task.id));
+                    deleteBtn.addEventListener('click', () => deleteTask(task.id));
+                });
+            }
+            
+            function updateProgress() {
+                const completedTasks = tasks.filter(task => task.completed).length;
+                const totalTasks = tasks.length;
+                const percentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+                
+                progressFill.style.width = `${percentage}%`;
+                progressText.textContent = `${completedTasks} / ${totalTasks} tasks done`;
+            }
+            
+            function scheduleAutoSave() {
+                // Clear existing timeout
+                if (autoSaveTimeout) {
+                    clearTimeout(autoSaveTimeout);
+                }
+                
+                // Schedule new save
+                autoSaveTimeout = setTimeout(() => {
+                    saveUserData();
+                }, 1000);
+            }
+            
+            function showNotification(message, type) {
+                notification.textContent = message;
+                notification.className = 'notification';
+                notification.classList.add(type);
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            function getRandomColor() {
+                const colors = ['#4682B4', '#A52A2A', '#556B2F', '#8B7355', '#D2B48C'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            // Add CSS animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                    20%, 40%, 60%, 80% { transform: translateX(5px); }
+                }
+                
+                @keyframes taskRemove {
+                    0% { opacity: 1; transform: translateX(0); }
+                    100% { opacity: 0; transform: translateX(100px); }
+                }
+                
+                @keyframes completed-animation {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                    100% { transform: scale(1); }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
